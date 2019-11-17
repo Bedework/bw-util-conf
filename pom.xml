@@ -108,49 +108,7 @@
         <version>${bw-util.version}</version>
       </dependency>
 
-      <dependency>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-dav</artifactId>
-        <version>${bw-util-network.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.bedework</groupId>
-        <artifactId>bw-util-http</artifactId>
-        <version>${bw-util-network.version}</version>
-      </dependency>
-
       <!-- Third Party Libraries -->
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-core</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-databind</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>com.fasterxml.jackson.core</groupId>
-        <artifactId>jackson-annotations</artifactId>
-        <version>${jackson.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpclient</artifactId>
-        <version>${http-client.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.httpcomponents</groupId>
-        <artifactId>httpcore</artifactId>
-        <version>${http-core.version}</version>
-      </dependency>
 
       <!-- Test Dependencies -->
       <dependency>
