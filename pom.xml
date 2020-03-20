@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>org.bedework</groupId>
   <artifactId>bw-util-conf</artifactId>
-  <version>4.1.0-SNAPSHOT</version>
+  <version>4.1.0</version>
   <packaging>pom</packaging>
   <name>bw-util-conf</name>
   <description>This project provides a number of utility configuration classes and methods</description>
@@ -42,6 +42,7 @@
     <connection>scm:git:git@github.com:Bedework/bw-util-conf.git</connection>
     <developerConnection>scm:git:git@github.com:Bedework/bw-util-conf.git</developerConnection>
     <url>https://github.com/Bedework/bw-util-conf</url>
+    <tag>bw-util-conf-4.1.0</tag>
   </scm>
 
   <issueManagement>
