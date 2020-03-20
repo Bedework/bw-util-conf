@@ -39,10 +39,9 @@
   </licenses>
 
   <scm>
-    <connection>scm:git:git@github.com:Bedework/bw-util.git</connection>
-    <developerConnection>scm:git:git@github.com:Bedework/bw-util.git</developerConnection>
-    <url>https://github.com/Bedework/bw-util</url>
-    <tag>bw-util-4.0.9</tag>
+    <connection>scm:git:git@github.com:Bedework/bw-util-conf.git</connection>
+    <developerConnection>scm:git:git@github.com:Bedework/bw-util-conf.git</developerConnection>
+    <url>https://github.com/Bedework/bw-util-conf</url>
   </scm>
 
   <issueManagement>
