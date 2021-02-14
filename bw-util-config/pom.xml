@@ -30,4 +30,23 @@
       <artifactId>bw-util-xml</artifactId>
     </dependency>
   </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.bedework</groupId>
+        <artifactId>bw-util-maven-deploy-wfmodule</artifactId>
+
+        <configuration>
+          <moduleName>org.bedework.util.config</moduleName>
+
+          <moduleDependencies>
+            <dependency>org.bedework.logging</dependency>
+            <dependency>org.bedework.util.misc</dependency>
+            <dependency>org.bedework.util.xml</dependency>
+          </moduleDependencies>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 </project>
