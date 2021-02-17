@@ -373,10 +373,13 @@ public class ConfigBase<T extends ConfigBase>
     }
 
     if (objClass == null) {
-      objClass = Class.forName(type);
+      //objClass = Class.forName(type);
+      objClass = Thread.currentThread()
+                       .getContextClassLoader()
+                       .loadClass(type);
     }
 
-    return objClass.newInstance();
+    return objClass.getDeclaredConstructor().newInstance();
   }
 
   private static Element parseXml(final InputStream is) throws Throwable {

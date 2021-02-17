@@ -694,16 +694,12 @@ public abstract class ConfBase<T extends ConfigBase>
 
   protected static Object makeObject(final String className) {
     try {
-      Object o = Class.forName(className).newInstance();
+      final var objClass = Thread.currentThread()
+                                 .getContextClassLoader()
+                                 .loadClass(className);
 
-      if (o == null) {
-        new BwLogger().setLoggedClass(ConfBase.class)
-                      .error("Class " + className + " not found");
-        return null;
-      }
-
-      return o;
-    } catch (Throwable t) {
+      return objClass.getDeclaredConstructor().newInstance();
+    } catch (final Throwable t) {
       new BwLogger().setLoggedClass(ConfBase.class)
                     .error("Unable to make object ", t);
       return null;
