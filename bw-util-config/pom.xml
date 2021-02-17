@@ -41,9 +41,15 @@
           <moduleName>org.bedework.util.config</moduleName>
 
           <moduleDependencies>
-            <dependency>org.bedework.logging</dependency>
-            <dependency>org.bedework.util.misc</dependency>
-            <dependency>org.bedework.util.xml</dependency>
+            <moduleDependency>
+              <name>org.bedework.logging</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.misc</name>
+            </moduleDependency>
+            <moduleDependency>
+              <name>org.bedework.util.xml</name>
+            </moduleDependency>
           </moduleDependencies>
         </configuration>
       </plugin>
