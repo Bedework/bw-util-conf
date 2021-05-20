@@ -167,7 +167,7 @@ public class ConfigBase<T extends ConfigBase>
 
   @Override
   public String toString() {
-    ToString ts = new ToString(this);
+    final ToString ts = new ToString(this);
 
     toStringSegment(ts);
 
@@ -180,7 +180,7 @@ public class ConfigBase<T extends ConfigBase>
 
   /**
    * @param list
-   * @param name
+   * @param name of property
    * @param val
    * @return possibly newly created list
    */
@@ -200,14 +200,14 @@ public class ConfigBase<T extends ConfigBase>
   /** Get a property stored as a String name = val
    *
    * @param col of property name+val
-   * @param name
+   * @param name of property
    * @return value or null
    */
   @ConfInfo(dontSave = true)
   public String getProperty(final Collection<String> col,
                             final String name) {
-    String key = name + "=";
-    for (String p: col) {
+    final String key = name + "=";
+    for (final String p: col) {
       if (p.startsWith(key)) {
         return p.substring(key.length());
       }
@@ -219,7 +219,7 @@ public class ConfigBase<T extends ConfigBase>
   /** Remove a property stored as a String name = val
    *
    * @param col
-   * @param name
+   * @param name of property
    */
   public void removeProperty(final Collection<String> col,
                              final String name) {
@@ -231,7 +231,7 @@ public class ConfigBase<T extends ConfigBase>
       }
 
       col.remove(name + "=" + v);
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new RuntimeException(t);
     }
   }
@@ -286,15 +286,15 @@ public class ConfigBase<T extends ConfigBase>
    */
   public void toXml(final Writer wtr) throws ConfigException {
     try {
-      XmlEmit xml = new XmlEmit();
+      final XmlEmit xml = new XmlEmit();
       xml.addNs(new NameSpace(ns, "BW"), true);
       xml.startEmit(wtr);
 
       dump(xml, false);
       xml.flush();
-    } catch (ConfigException cfe) {
+    } catch (final ConfigException cfe) {
       throw cfe;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }
@@ -365,7 +365,7 @@ public class ConfigBase<T extends ConfigBase>
     Class objClass = cl;
 
     /* Element may have type attribute */
-    String type = XmlUtil.getAttrVal(el, "type");
+    final String type = XmlUtil.getAttrVal(el, "type");
 
     if ((type == null) && (objClass == null)) {
       error("Must supply a class or have type attribute");
@@ -383,12 +383,12 @@ public class ConfigBase<T extends ConfigBase>
   }
 
   private static Element parseXml(final InputStream is) throws Throwable {
-    DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+    final DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
     factory.setNamespaceAware(true);
 
-    DocumentBuilder builder = factory.newDocumentBuilder();
+    final DocumentBuilder builder = factory.newDocumentBuilder();
 
-    Document doc = builder.parse(new InputSource(is));
+    final Document doc = builder.parse(new InputSource(is));
 
     if (doc == null) {
       return null;
@@ -410,7 +410,7 @@ public class ConfigBase<T extends ConfigBase>
                         final Object o,
                         final Collection<Object> col,
                         final Class cl) throws Throwable {
-    String name = subroot.getNodeName();
+    final String name = subroot.getNodeName();
 
     Method meth = null;
 
@@ -428,7 +428,7 @@ public class ConfigBase<T extends ConfigBase>
 
       /* We require a single parameter */
 
-      Class[] parClasses = meth.getParameterTypes();
+      final Class[] parClasses = meth.getParameterTypes();
       if (parClasses.length != 1) {
         error("Invalid setter method " + name);
         throw new ConfigException("Invalid setter method " + name);
@@ -442,7 +442,7 @@ public class ConfigBase<T extends ConfigBase>
     if (!XmlUtil.hasChildren(subroot)) {
       /* A primitive value for which we should have a setter */
 
-      Object val = simpleValue(elClass, subroot, name);
+      final Object val = simpleValue(elClass, subroot, name);
       if (val != null) {
         assign(val, col, o, meth);
       }
@@ -491,9 +491,9 @@ public class ConfigBase<T extends ConfigBase>
 
       Class colElType = (Class)fieldArgTypes[0];
       */
-      ConfInfo ci = meth.getAnnotation(ConfInfo.class);
+      final ConfInfo ci = meth.getAnnotation(ConfInfo.class);
 
-      String colElTypeName;
+      final String colElTypeName;
 
       if (ci == null) {
         colElTypeName = "java.lang.String";
@@ -501,7 +501,7 @@ public class ConfigBase<T extends ConfigBase>
         colElTypeName = ci.elementType();
       }
 
-      for (Element el: XmlUtil.getElementsArray(subroot)) {
+      for (final Element el: XmlUtil.getElementsArray(subroot)) {
         populate(el, o, colVal, Class.forName(colElTypeName));
       }
 
@@ -510,33 +510,32 @@ public class ConfigBase<T extends ConfigBase>
 
     /* Asssume a complex type */
 
-    Object val = getObject(subroot, elClass);
+    final Object val = getObject(subroot, elClass);
 
     assign(val, col, o, meth);
 
-    for (Element el: XmlUtil.getElementsArray(subroot)) {
+    for (final Element el: XmlUtil.getElementsArray(subroot)) {
       populate(el, val, null, null);
     }
   }
 
   private Method findSetter(final Object val,
                             final String name) throws Throwable {
-    String methodName = "set" + name.substring(0, 1).toUpperCase() +
+    final String methodName = "set" + name.substring(0, 1).toUpperCase() +
                         name.substring(1);
-    Method[] meths = val.getClass().getMethods();
+    final Method[] meths = val.getClass().getMethods();
     Method meth = null;
 
-    for (int i = 0; i < meths.length; i++) {
-      Method m = meths[i];
-
-      ConfInfo ci = m.getAnnotation(ConfInfo.class);
+    for (final Method m: meths) {
+      final ConfInfo ci = m.getAnnotation(ConfInfo.class);
       if ((ci != null) && ci.dontSave()) {
         continue;
       }
 
       if (m.getName().equals(methodName)) {
         if (meth != null) {
-          throw new ConfigException("Multiple setters for field " + name);
+          throw new ConfigException(
+                  "Multiple setters for field " + name);
         }
         meth = m;
       }
@@ -565,7 +564,7 @@ public class ConfigBase<T extends ConfigBase>
     if (col != null) {
       col.add(val);
     } else {
-      Object[] pars = new Object[]{val};
+      final Object[] pars = new Object[]{val};
 
       meth.invoke(o, pars);
     }
@@ -633,7 +632,7 @@ public class ConfigBase<T extends ConfigBase>
   private void dump(final XmlEmit xml,
                     final boolean fromCollection) throws Throwable {
     final Class thisClass = getClass();
-    ConfInfo ciCl = (ConfInfo)thisClass.getAnnotation(ConfInfo.class);
+    final ConfInfo ciCl = (ConfInfo)thisClass.getAnnotation(ConfInfo.class);
 
     /* defClass defines the fields we need to dump */
     Class defClass = thisClass;
@@ -645,20 +644,20 @@ public class ConfigBase<T extends ConfigBase>
 
     if ((defClassName != null) &&
         !defClassName.equals(thisClass.getCanonicalName())) {
-      Class c = findClass(thisClass, defClassName);
+      final Class c = findClass(thisClass, defClassName);
       if (c != null) {
         defClass = c;
       }
     }
 
-    QName qn = startElement(xml, thisClass, ciCl);
+    final QName qn = startElement(xml, thisClass, ciCl);
 
-    Collection<ComparableMethod> ms = findGetters(defClass);
+    final Collection<ComparableMethod> ms = findGetters(defClass);
 
-    for (ComparableMethod cm: ms) {
-      Method m = cm.m;
+    for (final ComparableMethod cm: ms) {
+      final Method m = cm.m;
 
-      ConfInfo ci = m.getAnnotation(ConfInfo.class);
+      final ConfInfo ci = m.getAnnotation(ConfInfo.class);
 
       dumpValue(xml, m, ci, m.invoke(this, (Object[])null), fromCollection);
     }
@@ -671,18 +670,18 @@ public class ConfigBase<T extends ConfigBase>
   private Class findClass(Class cl,
                           String cname) throws Throwable {
     /* Do interfaces first - it's usually one of those. */
-    for (Class c: cl.getInterfaces()) {
+    for (final Class c: cl.getInterfaces()) {
       if (c.getCanonicalName().equals(cname)) {
         return c;
       }
 
-      Class ic = findClass(c, cname);
+      final Class ic = findClass(c, cname);
       if (ic != null) {
         return ic;
       }
     }
 
-    Class c = cl.getSuperclass();
+    final Class c = cl.getSuperclass();
     if (c == null) {
       return null;
     }
@@ -700,7 +699,7 @@ public class ConfigBase<T extends ConfigBase>
   private QName startElement(final XmlEmit xml,
                              final Class c,
                              final ConfInfo ci) throws Throwable {
-    QName qn;
+    final QName qn;
 
     if (ci == null) {
       qn = new QName(ns, c.getName());
@@ -717,7 +716,7 @@ public class ConfigBase<T extends ConfigBase>
                              final Method m,
                              final ConfInfo ci,
                              final boolean fromCollection) throws Throwable {
-    QName qn = getTag(m, ci, fromCollection);
+    final QName qn = getTag(m, ci, fromCollection);
 
     if (qn != null) {
       xml.openTag(qn);
@@ -778,9 +777,9 @@ public class ConfigBase<T extends ConfigBase>
      * We do open a tag if the annotation specifies a collectionElementName
      */
     if (methVal instanceof ConfigBase) {
-      ConfigBase de = (ConfigBase)methVal;
+      final ConfigBase de = (ConfigBase)methVal;
 
-      QName mqn = startElement(xml, m, ci, fromCollection);
+      final QName mqn = startElement(xml, m, ci, fromCollection);
 
       de.dump(xml, false);
 
@@ -792,7 +791,7 @@ public class ConfigBase<T extends ConfigBase>
     }
 
     if (methVal instanceof Collection) {
-      Collection c = (Collection)methVal;
+      final Collection c = (Collection)methVal;
 
       if (c.isEmpty()) {
         return false;
@@ -800,7 +799,7 @@ public class ConfigBase<T extends ConfigBase>
 
       QName mqn = null;
 
-      for (Object o: c) {
+      for (final Object o: c) {
         if (mqn == null) {
           mqn = startElement(xml, m, ci, fromCollection);
         }
@@ -837,7 +836,7 @@ public class ConfigBase<T extends ConfigBase>
         qn = new QName(p.getClass().getName());
       }
 
-      String sval;
+      final String sval;
 
       if (p instanceof char[]) {
         sval = new String((char[])p);
@@ -850,24 +849,23 @@ public class ConfigBase<T extends ConfigBase>
       } else {
         xml.cdataProperty(qn, sval);
       }
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }
 
   private Collection<ComparableMethod> findGetters(Class cl) throws ConfigException {
-    Method[] meths = cl.getMethods();
-    Collection<ComparableMethod> getters = new TreeSet<ComparableMethod>();
+    final Method[] meths = cl.getMethods();
+    final Collection<ComparableMethod> getters = new TreeSet<ComparableMethod>();
 
-    for (int i = 0; i < meths.length; i++) {
-      Method m = meths[i];
-      ConfInfo ci = m.getAnnotation(ConfInfo.class);
+    for (final Method m: meths) {
+      final ConfInfo ci = m.getAnnotation(ConfInfo.class);
 
       if ((ci != null) && ci.dontSave()) {
         continue;
       }
 
-      String mname = m.getName();
+      final String mname = m.getName();
 
       if (mname.length() < 4) {
         continue;
@@ -884,7 +882,7 @@ public class ConfigBase<T extends ConfigBase>
       }
 
       /* No parameters */
-      Class[] parClasses = m.getParameterTypes();
+      final Class[] parClasses = m.getParameterTypes();
       if (parClasses.length != 0) {
         continue;
       }
@@ -899,7 +897,7 @@ public class ConfigBase<T extends ConfigBase>
    *                   Logged methods
    * ==================================================================== */
 
-  private BwLogger logger = new BwLogger();
+  private final BwLogger logger = new BwLogger();
 
   @Override
   public BwLogger getLogger() {

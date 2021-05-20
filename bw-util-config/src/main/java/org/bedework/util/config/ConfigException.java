@@ -27,7 +27,7 @@ package org.bedework.util.config;
 public class ConfigException extends Throwable {
   /** Constructor
    *
-   * @param s
+   * @param s a message
    */
   public ConfigException(final String s) {
     super(s);
@@ -35,7 +35,7 @@ public class ConfigException extends Throwable {
 
   /** Constructor
    *
-   * @param t
+   * @param t a Throwable object
    */
   public ConfigException(final Throwable t) {
     super(t);
