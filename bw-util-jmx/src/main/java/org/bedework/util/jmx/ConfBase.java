@@ -406,7 +406,7 @@ public abstract class ConfBase<T extends ConfigBase>
       }
 
       return "OK";
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       error("Failed to load configuration: " + t.getLocalizedMessage());
       error(t);
       return "failed";
