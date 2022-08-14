@@ -18,6 +18,8 @@
 */
 package org.bedework.util.config;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -41,15 +43,14 @@ public interface ConfigurationStore {
 
   /**
    * @return path for this store
-   * @throws ConfigException on error
    */
-  String getLocation() throws ConfigException;
+  Path getDirPath();
 
   /**
    * @param config to save
    * @throws ConfigException on error
    */
-  void saveConfiguration(ConfigBase config) throws ConfigException;
+  void saveConfiguration(ConfigBase<?> config) throws ConfigException;
 
   /** Stored config must indicate class of object as an attribute
    *
@@ -57,7 +58,7 @@ public interface ConfigurationStore {
    * @return config or null
    * @throws ConfigException on error
    */
-  ConfigBase getConfig(String name) throws ConfigException;
+  ConfigBase<?> getConfig(String name) throws ConfigException;
 
   /**
    * @param name of the object
@@ -65,8 +66,8 @@ public interface ConfigurationStore {
    * @return config or null
    * @throws ConfigException on error
    */
-  ConfigBase getConfig(String name,
-                       Class cl) throws ConfigException;
+  ConfigBase<?> getConfig(String name,
+                          Class<?> cl) throws ConfigException;
 
   /** List the configurations in the store
    *
@@ -91,4 +92,21 @@ public interface ConfigurationStore {
    */
   ResourceBundle getResource(String name,
                              String locale) throws ConfigException;
+
+
+  default Path ensureDir(final Path path) throws ConfigException {
+    final File f = path.toFile();
+    if (!f.exists()) {
+      throw new ConfigException("No configuration directory at " +
+                                        f.getAbsolutePath());
+    }
+
+    if (!f.isDirectory()) {
+      throw new ConfigException(f.getAbsolutePath() +
+                                        " is not a directory");
+    }
+
+    return path;
+  }
+
 }

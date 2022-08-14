@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -35,36 +36,15 @@ import java.util.ResourceBundle.Control;
  * @author Mike Douglass douglm
  */
 public class ConfigurationFileStore implements ConfigurationStore {
-  private String dirPath;
+  private final Path dirPath;
 
   private Control resourceControl;
 
   /**
-   * @param dirPath location of config
-   * @throws ConfigException on error
+   * @param dirPath Path object already checked to be a directory
    */
-  public ConfigurationFileStore(final String dirPath) throws ConfigException {
-    try {
-      this.dirPath = dirPath;
-
-      final File f = new File(dirPath);
-
-      if (!f.exists()) {
-        if (!f.mkdir()) {
-          throw new ConfigException("Unable to create directory " + dirPath);
-        }
-      }
-
-      if (!f.isDirectory()) {
-        throw new ConfigException(dirPath + " is not a directory");
-      }
-
-      this.dirPath = f.getCanonicalPath() + File.separator;
-    } catch (final ConfigException ce) {
-      throw ce;
-    } catch (final Throwable t) {
-      throw new ConfigException(t);
-    }
+  public ConfigurationFileStore(final Path dirPath) {
+    this.dirPath = dirPath;
   }
 
   @Override
@@ -73,60 +53,64 @@ public class ConfigurationFileStore implements ConfigurationStore {
   }
 
   @Override
-  public String getLocation() throws ConfigException {
+  public Path getDirPath() {
     return dirPath;
   }
 
   @Override
-  public void saveConfiguration(final ConfigBase config) throws ConfigException {
+  public void saveConfiguration(final ConfigBase<?> config) throws ConfigException {
     try {
-      File f = new File(dirPath + config.getName() + ".xml");
+      final File f = new File(dirPath + config.getName() + ".xml");
 
-      FileWriter fw = new FileWriter(f);
+      final FileWriter fw = new FileWriter(f);
 
       config.toXml(fw);
 
       fw.close();
-    } catch (ConfigException ce) {
+    } catch (final ConfigException ce) {
       throw ce;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     }
   }
 
   @Override
-  public ConfigBase getConfig(final String name) throws ConfigException {
+  public ConfigBase<?> getConfig(final String name) throws ConfigException {
     return getConfig(name, null);
   }
 
   @Override
-  public ConfigBase getConfig(final String name,
-                              final Class cl) throws ConfigException {
+  public ConfigBase<?> getConfig(final String name,
+                                 final Class<?> cl) throws ConfigException {
     FileInputStream fis = null;
 
     try {
-      File f = new File(dirPath + name + ".xml");
+      final Path fPath = dirPath.resolve(name + ".xml");
+      final File f = fPath.toFile();
 
       if (!f.exists()) {
-        return null;
+        throw new ConfigException("Configuration " + fPath +
+                " does not exist");
       }
 
       fis = new FileInputStream(f);
 
-      ConfigBase config = new ConfigBase().fromXml(fis, cl);
-
-      return config;
-    } catch (ConfigException ce) {
+      return new ConfigBase().fromXml(fis, cl);
+    } catch (final ConfigException ce) {
       throw ce;
-    } catch (Throwable t) {
+    } catch (final Throwable t) {
       throw new ConfigException(t);
     } finally {
       if (fis != null) {
         try {
           fis.close();
-        } catch (Throwable t) {}
+        } catch (final Throwable ignored) {}
       }
     }
+  }
+
+  public File getDirFile() {
+    return dirPath.toFile();
   }
 
   private static class FilesOnly implements FileFilter {
@@ -142,22 +126,22 @@ public class ConfigurationFileStore implements ConfigurationStore {
 
   @Override
   public List<String> getConfigs() throws ConfigException {
-    try {
-      File dir = new File(dirPath);
+    final File dir = getDirFile();
 
-      File[] files = dir.listFiles(new FilesOnly());
+    final File[] files = dir.listFiles(new FilesOnly());
 
-      List<String> names = new ArrayList<String>();
+    final List<String> names = new ArrayList<>();
 
-      for (File f: files) {
-        String nm = f.getName();
-        names.add(nm.substring(0, nm.indexOf(".xml")));
-      }
-
-      return names;
-    } catch (Throwable t) {
-      throw new ConfigException(t);
+    if (files == null) {
+      throw new ConfigException("No configuration files in " + dirPath);
     }
+
+    for (final File f: files) {
+      final String nm = f.getName();
+      names.add(nm.substring(0, nm.indexOf(".xml")));
+    }
+
+    return names;
   }
 
   private static class DirsOnly implements FileFilter {
@@ -175,27 +159,7 @@ public class ConfigurationFileStore implements ConfigurationStore {
    */
   @Override
   public ConfigurationStore getStore(final String name) throws ConfigException {
-    try {
-      final File dir = new File(dirPath);
-      final String newPath = dirPath + name;
-
-      final File[] files = dir.listFiles(new DirsOnly());
-
-      for (final File f: files) {
-        if (f.getName().equals(name)) {
-          return new ConfigurationFileStore(newPath);
-        }
-      }
-
-      final File newDir = new File(newPath);
-      if (!newDir.mkdir()) {
-        throw new ConfigException("Unable to create directory " + newPath);
-      }
-
-      return new ConfigurationFileStore(newPath);
-    } catch (final Throwable t) {
-      throw new ConfigException(t);
-    }
+    return new ConfigurationFileStore(ensureDir(dirPath.resolve(name)));
   }
 
   @Override

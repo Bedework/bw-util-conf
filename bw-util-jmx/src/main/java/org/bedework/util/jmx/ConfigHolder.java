@@ -29,11 +29,6 @@ import org.bedework.util.config.ConfigurationStore;
  */
 public interface ConfigHolder<T extends ConfigBase> {
   /**
-   * @return path of config directory.
-   */
-  String getConfigUri();
-
-  /**
    * @return the current state of the configuration.
    */
   T getConfig();

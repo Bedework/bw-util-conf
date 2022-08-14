@@ -24,78 +24,24 @@ import org.bedework.util.config.ConfigurationFileStore;
 import org.bedework.util.config.ConfigurationStore;
 import org.bedework.util.logging.BwLogger;
 import org.bedework.util.logging.Logged;
-import org.bedework.util.misc.Util;
 
 import java.io.File;
-import java.io.FileReader;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 
-/** A configuration has a name and a location. The location can be specified in
- * a number of ways: <ul>
- * <li>An absolute path to the directory containing the config</li>
- * <li>Through definitions in a property file</li>
- * </ul>
+/** A configuration has a directory and name.
  *
- * <p>The property file approach uses the system property <br/>
- * <em>org.bedework.config.pfile</em><br/>
- * which provides
- * the absolute path to a property file which may be fetched via http or
- * read as a local file.
- * </p>
- *
- * <p>
- *   This file has properties defined for each configuration and
- *   some global to all<ul>
- * <li><em>org.bedework.config.base</em> if provided defines a base for
- * all configs which will be prepended</li>
- * <li><em>One or more config paths</em>The name of each is specified
- * by the configPname field for the mbean. If a config base is provided
- * this will be appended to that to give a absolute path</li>
- * </ul>
- * </p>
- *
- * <p>An example file may look like:
- * <pre>
- org.bedework.config.base=file://$JBOSS_SERVER_DIR/conf/bedework/
-
- #         Calendar clients config dir
- org.bedework.clients.confuri=client-configs
-
- #         Calendar core config dir
- org.bedework.bwcore.confuri=bwcore
-
- #         Calendar engine config dir
- org.bedework.bwengine.confuri=bwengine
-
- #         carddav conf dir
- org.bedework.carddav.confuri=carddavConfig
-
- #         hosts conf dir
- org.bedework.hosts.confuri=hosts
-
- #         selfreg conf dir
- org.bedework.selfreg.confuri=selfreg
-
- #         synch conf dir
- org.bedework.synch.confuri=synch
-
- #         tzsvr conf dir
- org.bedework.tzs.confuri=tzsvr
-
- * </pre>
- *
- * </p>
+ * <p>The base directory in which all configs are found is
+ * specified by the system property "org.bedework.config.dir".
  *
  * <p>Each may be augmented by providing a path suffix - used to add additional
  * path elements to the base path.
@@ -116,20 +62,11 @@ public abstract class ConfBase<T extends ConfigBase>
 
   protected T cfg;
 
-  private String configName;
-
-  /* The absolute path to the directory */
-  private String configuri;
+  private final String configName;
 
   private String status = statusUnknown;
 
-  private static volatile Object pfileLock = new Object();
-
-  private static Properties pfile;
-
-  private final static String pfilePname = "org.bedework.config.pfile";
-
-  private final static String configBasePname = "org.bedework.config.base";
+  private final static String confDirPname = "org.bedework.config.dir";
 
   /* From the pfile */
   private static String configBase;
@@ -148,33 +85,61 @@ public abstract class ConfBase<T extends ConfigBase>
   }
 
   /* The property which defines the path - possibly relative */
-  private String configPname;
+  private final String configDirectory;
 
-  private String pathSuffix;
+  private final String pathSuffix;
 
   private static Set<ObjectName> registeredMBeans = new CopyOnWriteArraySet<ObjectName>();
 
   private static ManagementContext managementContext;
 
-  private String serviceName;
+  private final String serviceName;
 
   private ConfigurationStore store;
 
-  /** At least setServiceName MUST be called
+  /**
    *
+   * @param serviceName service name e.g. "org.bedework.timezones:service=Convert"
+   * @param store
+   * @param configName configuration name
    */
-  protected ConfBase() {
-  }
-
-  protected ConfBase(final String serviceName) {
+  protected ConfBase(final String serviceName,
+                     final ConfigurationStore store,
+                     final String configName) {
     this.serviceName = serviceName;
+    this.configName = configName;
+    configDirectory = null;
+    pathSuffix = null;
+    this.store = store;
   }
 
   /**
-   * @param val IDENTICAL to that defined for service.
+   *
+   * @param serviceName service name e.g. "org.bedework.timezones:service=Convert"
+   * @param configDirectory Name of config directory
+   * @param configName configuration name
    */
-  public void setServiceName(final String val) {
-    serviceName = val;
+  protected ConfBase(final String serviceName,
+                     final String configDirectory,
+                     final String configName) {
+    this(serviceName, configDirectory, null, configName);
+  }
+
+  /**
+   *
+   * @param serviceName service name e.g. "org.bedework.timezones:service=Convert"
+   * @param configDirectory Name of config directory
+   * @param pathSuffix Specify a suffix to the path to the configuration directory.
+   * @param configName configuration name
+   */
+  protected ConfBase(final String serviceName,
+                     final String configDirectory,
+                     final String pathSuffix,
+                     final String configName) {
+    this.serviceName = serviceName;
+    this.configDirectory = configDirectory;
+    this.configName = configName;
+    this.pathSuffix = pathSuffix;
   }
 
   @Override
@@ -207,45 +172,11 @@ public abstract class ConfBase<T extends ConfigBase>
     return true;
   }
 
-  /** Specify the absolute path to the configuration directory.
-   *
-   * @param val
-   */
-  public void setConfigUri(final String val) {
-    configuri = val;
-    store = null;
-  }
-
-  /**
-   * @return String path to configs
-   */
-  public String getConfigUri() {
-    return configuri;
-  }
-
-  /** Specify a system property giving the absolute path to the configuration directory.
-   *
-   * @param val
-   */
-  public void setConfigPname(final String val) {
-    configPname = val;
-    store = null;
-  }
-
   /**
    * @return String name of system property
    */
-  public String getConfigPname() {
-    return configPname;
-  }
-
-  /** Specify a suffix to the path to the configuration directory.
-   *
-   * @param val
-   */
-  public void setPathSuffix(final String val) {
-    pathSuffix = val;
-    store = null;
+  public String getConfigDirectory() {
+    return configDirectory;
   }
 
   /**
@@ -273,75 +204,12 @@ public abstract class ConfBase<T extends ConfigBase>
       return store;
     }
 
-    String uriStr = getConfigUri();
+    final String cdir = getConfigDirectory();
 
-    if (uriStr == null) {
-      getPfile();
+    final var configPath = getPfilePath(cdir);
 
-      String configPname = getConfigPname();
-
-      if (configPname == null) {
-        throw new ConfigException("Either a uri or property name must be specified");
-      }
-
-      uriStr = pfile.getProperty(configPname);
-      if (uriStr == null) {
-        /* If configPname ends with ".confuri" we'll take the 
-           preceding segment as a possible directory
-         */
-        if (configPname.endsWith(".confuri")) {
-          final int lastDotpos = configPname.length() - 8;
-          final int pos = configPname
-                  .lastIndexOf('.', lastDotpos - 1);
-          if (pos > 0) {
-            uriStr = configPname.substring(pos + 1, lastDotpos);
-          }
-        }
-      }
-      
-      if (uriStr == null) {
-        throw new ConfigException("No property with name \"" +
-                                          configPname + "\"");
-      }
-    }
-
-    try {
-      URI uri= new URI(uriStr);
-
-      String scheme = uri.getScheme();
-
-      if (scheme == null) {
-        // Possible non-absolute path
-        String path = uri.getPath();
-
-        File f = new File(path);
-        if (!f.isAbsolute() && configBase != null) {
-          path = configBase + path;
-        }
-
-        uri= new URI(path);
-        scheme = uri.getScheme();
-      }
-
-      if ((scheme == null) || (scheme.equals("file"))) {
-        String path = uri.getPath();
-
-        if (getPathSuffix() != null) {
-          if (!path.endsWith(File.separator)) {
-            path += File.separator;
-          }
-
-          path += getPathSuffix() + File.separator;
-        }
-
-        store = new ConfigurationFileStore(path);
-        return store;
-      }
-
-      throw new ConfigException("Unsupported ConfigurationStore: " + uri);
-    } catch (URISyntaxException use) {
-      throw new ConfigException(use);
-    }
+    store = new ConfigurationFileStore(configPath);
+    return store;
   }
 
   /**
@@ -367,11 +235,6 @@ public abstract class ConfBase<T extends ConfigBase>
    * ======================================================================== */
 
   @Override
-  public void setConfigName(final String val) {
-    configName = val;
-  }
-
-  @Override
   public String getConfigName() {
     return configName;
   }
@@ -383,12 +246,12 @@ public abstract class ConfBase<T extends ConfigBase>
   @Override
   public String saveConfig() {
     try {
-      T config = getConfig();
+      final T config = getConfig();
       if (config == null) {
         return "No configuration to save";
       }
 
-      ConfigurationStore cs = getStore();
+      final ConfigurationStore cs = getStore();
 
       config.setName(configName);
 
@@ -401,86 +264,48 @@ public abstract class ConfBase<T extends ConfigBase>
     }
   }
 
+  public static Path ensureDir(final Path path) throws ConfigException {
+    final File f = path.toFile();
+    if (!f.exists()) {
+      throw new ConfigException("No configuration directory at " +
+                                        f.getAbsolutePath());
+    }
+
+    if (!f.isDirectory()) {
+      throw new ConfigException(f.getAbsolutePath() +
+                                        " is not a directory");
+    }
+
+    return path;
+  }
+
   /* ====================================================================
    *                   Private methods
    * ==================================================================== */
 
-  private void getPfile() throws ConfigException {
-    if (pfile != null) {
-      return;
+  private Path getPfilePath(final String configDirName)
+          throws ConfigException {
+    if (configDirName == null) {
+      throw new ConfigException("Must supply a config directory name");
     }
 
-    String pfileUri = System.getProperty(pfilePname);
+    final String baseConfigPath = System.getProperty(confDirPname);
 
-    if (pfileUri == null) {
-      throw new ConfigException("No property with name \"" +
-                                        pfilePname + "\"");
+    if (baseConfigPath == null) {
+      throw new ConfigException("No system property with name \"" +
+                                        confDirPname + "\"");
     }
 
-    try {
-/*
-      URI uri;
-      uri = new URI(pfileUri);
+    final Path path = Paths.get(baseConfigPath);
+    ensureDir(path);
 
-      String scheme = uri.getScheme();
+    final Path configPath = path.resolve(configDirName);
 
-      if ((scheme == null) || (scheme.equals("file"))) {
-        */
-      String path = pfileUri;
-      File f = new File(path);
-      if (!f.exists()) {
-        throw new ConfigException("No configuration pfile at " + path);
-      }
-
-      if (!f.isFile()) {
-        throw new ConfigException(path + " is not a file");
-      }
-
-      final Util.PropertiesPropertyFetcher ppf =
-              new Util.PropertiesPropertyFetcher(System.getProperties());
-
-        synchronized (pfileLock) {
-          if (pfile != null) {
-            // Someone beat us to it
-            return;
-          }
-
-          pfile = new Properties();
-          pfile.load(new FileReader(f));
-
-          /* Do any property replacement on values */
-          Set pfileNames = pfile.keySet();
-
-          for (Object o: pfileNames) {
-            pfile.put(o, Util.propertyReplace(pfile.getProperty((String)o),
-                                              ppf));
-          }
-
-          configBase = pfile.getProperty(configBasePname);
-
-          URI uri = new URI(configBase);
-          String scheme = uri.getScheme();
-
-          if ((scheme == null) || (scheme.equals("file"))) {
-            configBase = uri.getPath();
-            configBaseIsFile = true;
-          } else if (httpSchemes.contains(scheme)) {
-            configBaseIsHttp = true;
-          } else {
-            throw new ConfigException("Unsupported scheme in " + uri);
-          }
-        }
-
-/*        return;
-      }
-
-      throw new ConfigException("Unsupported configuration pfile: " + uri);
-      */
-    } catch (ConfigException ce) {
-      throw ce;
-    } catch (Throwable t) {
-      throw new ConfigException(t);
+    if (getPathSuffix() == null) {
+      return ensureDir(configPath);
     }
+
+    return ensureDir(configPath.resolve(getPathSuffix()));
   }
 
   /* ====================================================================
@@ -588,49 +413,6 @@ public abstract class ConfBase<T extends ConfigBase>
     }
   }
 
-  /** Load the configuration if we only expect one and we don't care or know
-   * what it's called.
-   *
-   * @param cl
-   * @return null for success or an error message (logged already)
-   */
-  protected String loadOnlyConfig(final Class<T> cl) {
-    try {
-      /* Load up the config */
-
-      ConfigurationStore cs = getStore();
-
-      List<String> configNames = cs.getConfigs();
-
-      if (configNames.isEmpty()) {
-        error("No configuration on path " + cs.getLocation());
-        return "No configuration on path " + cs.getLocation();
-      }
-
-      if (configNames.size() != 1) {
-        error("1 and only 1 configuration allowed");
-        return "1 and only 1 configuration allowed";
-      }
-
-      String configName = configNames.iterator().next();
-
-      cfg = getConfigInfo(cs, configName, cl);
-
-      if (cfg == null) {
-        error("Unable to read configuration");
-        return "Unable to read configuration";
-      }
-
-      setConfigName(configName);
-
-      return null;
-    } catch (Throwable t) {
-      error("Failed to load configuration: " + t.getLocalizedMessage());
-      error(t);
-      return "failed";
-    }
-  }
-
   /**
    * @param key
    * @param bean
@@ -691,14 +473,25 @@ public abstract class ConfBase<T extends ConfigBase>
     }
     return managementContext;
   }
-
-  protected static Object makeObject(final String className) {
+  /**
+   *
+   * @param serviceName service name e.g. "org.bedework.timezones:service=Convert"
+   * @param store
+   * @param configName String configuration name
+   */
+  protected static Object makeObject(final String className,
+                                     final String serviceName,
+                                     final ConfigurationStore store,
+                                     final String configName) {
     try {
       final var objClass = Thread.currentThread()
                                  .getContextClassLoader()
                                  .loadClass(className);
 
-      return objClass.getDeclaredConstructor().newInstance();
+      return objClass.getDeclaredConstructor(String.class,
+                                             ConfigurationStore.class,
+                                             String.class).
+                     newInstance(serviceName, store, configName);
     } catch (final Throwable t) {
       new BwLogger().setLoggedClass(ConfBase.class)
                     .error("Unable to make object ", t);

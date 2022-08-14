@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
@@ -37,9 +38,9 @@ import java.util.ResourceBundle.Control;
 public class FileResourceControl extends Control {
   private final String dirPath;
 
-  FileResourceControl(final String dirPath) throws ConfigException {
+  FileResourceControl(final Path dirPath) throws ConfigException {
     try {
-      final File f = new File(dirPath);
+      final File f = dirPath.toFile();
 
       if (!f.isDirectory()) {
         throw new ConfigException(dirPath + " is not a directory");
