@@ -65,3 +65,6 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 #### 5.0.4
  * Retry after release failed.
 
+#### 5.0.5
+ * Update commons-text version.
+
