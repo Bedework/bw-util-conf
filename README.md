@@ -34,4 +34,31 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 
 ### Release Notes
 #### 4.1.0
-    * Move Arg class in.
+ * Move Arg class in.
+
+#### 4.1.1
+ * Deploy to module.
+ * Update library versions.
+
+#### 4.1.2
+ * Update library versions.
+
+#### 4.1.3
+ * Update library versions.
+
+#### 4.1.4
+ * Update library versions.
+
+#### 5.0.0
+ * Update library versions.
+ * Use bedework-parent
+
+#### 5.0.1
+ * Update library versions.
+
+#### 5.0.2
+ * Update library versions.
+
+#### 5.0.3
+ * Update library versions.
+
