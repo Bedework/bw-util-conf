@@ -68,3 +68,5 @@ For full details, see [Sonatype's documentation for using Maven to publish relea
 #### 5.0.5
  * Update commons-text version.
 
+#### 5.0.6
+* Move response classes and ToString into bw-base module.
