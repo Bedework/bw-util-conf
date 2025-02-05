@@ -10,7 +10,7 @@
   <packaging>pom</packaging>
 
   <artifactId>bw-util-conf</artifactId>
-  <version>5.0.6</version>
+  <version>6.0.0-SNAPSHOT</version>
   <name>Bedework: configuration utils</name>
   <description>This project provides a number of utility configuration classes and methods</description>
   <url>https://github.com/Bedework/bw-util-conf</url>
