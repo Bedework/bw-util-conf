@@ -24,12 +24,12 @@ import java.util.List;
  *
  * @author Mike Douglass
  */
-public interface HibernateConfigI {
+public interface OrmConfigI {
   /**
    *
    * @param val
    */
-  void setHibernateProperties(final List<String> val);
+  void setOrmProperties(final List<String> val);
 
   /**
    *
@@ -37,7 +37,7 @@ public interface HibernateConfigI {
    */
   @ConfInfo(collectionElementName = "hibernateProperty" ,
             elementType = "java.lang.String")
-  List<String> getHibernateProperties();
+  List<String> getOrmProperties();
 
   /**
    * @param val
@@ -55,8 +55,8 @@ public interface HibernateConfigI {
    * @param name
    * @param val
    */
-  void addHibernateProperty(final String name,
-                            final String val);
+  void addOrmProperty(final String name,
+                      final String val);
 
   /** Get a hibernate property
    *
@@ -64,13 +64,13 @@ public interface HibernateConfigI {
    * @return value or null
    */
   @ConfInfo(dontSave = true)
-  String getHibernateProperty(final String name);
+  String getOrmProperty(final String name);
 
   /** Remove a hibernate property
    *
    * @param name
    */
-  void removeHibernateProperty(final String name);
+  void removeOrmProperty(final String name);
 
   /** Set a hibernate property
    *
@@ -78,6 +78,6 @@ public interface HibernateConfigI {
    * @param val
    */
   @ConfInfo(dontSave = true)
-  void setHibernateProperty(final String name,
-                            final String val);
+  void setOrmProperty(final String name,
+                      final String val);
 }

@@ -22,69 +22,69 @@ import org.bedework.base.ToString;
 
 import java.util.List;
 
-/** Used by configuration classes that want to save a set of hibernate properties.
+/** Used by configuration classes that want to save a set of
+ * orm properties.
  *
  * @author Mike Douglass
  * @param <T>
  */
-public class HibernateConfigBase<T extends ConfigBase>
-        extends ConfigBase<T> implements HibernateConfigI {
-  private List<String> hibernateProperties;
+public class OrmConfigBase<T extends ConfigBase>
+        extends ConfigBase<T> implements OrmConfigI {
+  private List<String> ormProperties;
 
   @Override
-  public void setHibernateProperties(final List<String> val) {
-    hibernateProperties = val;
+  public void setOrmProperties(final List<String> val) {
+    ormProperties = val;
   }
 
   @Override
-  @ConfInfo(collectionElementName = "hibernateProperty" ,
-            elementType = "java.lang.String")
-  public List<String> getHibernateProperties() {
-    return hibernateProperties;
+  @ConfInfo(collectionElementName = "ormProperty")
+  public List<String> getOrmProperties() {
+    return ormProperties;
   }
 
   @Override
   public void setHibernateDialect(final String val) {
-    setHibernateProperty("hibernate.dialect", val);
+    setOrmProperty("hibernate.dialect", val);
   }
 
   @Override
   @ConfInfo(dontSave = true)
   public String getHibernateDialect() {
-    return getHibernateProperty("hibernate.dialect");
+    return getOrmProperty("hibernate.dialect");
   }
 
   @Override
-  public void addHibernateProperty(final String name,
-                                   final String val) {
-    setHibernateProperties(addListProperty(getHibernateProperties(),
-                                           name, val));
-  }
-
-  @Override
-  @ConfInfo(dontSave = true)
-  public String getHibernateProperty(final String name) {
-    return getProperty(getHibernateProperties(), name);
-  }
-
-  @Override
-  public void removeHibernateProperty(final String name) {
-    removeProperty(getHibernateProperties(), name);
+  public void addOrmProperty(final String name,
+                             final String val) {
+    setOrmProperties(addListProperty(getOrmProperties(),
+                                     name, val));
   }
 
   @Override
   @ConfInfo(dontSave = true)
-  public void setHibernateProperty(final String name,
-                                   final String val) {
-    setHibernateProperties(setListProperty(getHibernateProperties(),
-                                           name, val));
+  public String getOrmProperty(final String name) {
+    return getProperty(getOrmProperties(), name);
+  }
+
+  @Override
+  public void removeOrmProperty(final String name) {
+    removeProperty(getOrmProperties(), name);
+  }
+
+  @Override
+  @ConfInfo(dontSave = true)
+  public void setOrmProperty(final String name,
+                             final String val) {
+    setOrmProperties(setListProperty(getOrmProperties(),
+                                     name, val));
   }
 
   @Override
   public void toStringSegment(final ToString ts) {
     super.toStringSegment(ts);
 
-    ts.append("hibernateProperties", getHibernateProperties());
+    ts.append("ormProperties", getOrmProperties());
   }
 
   @Override
