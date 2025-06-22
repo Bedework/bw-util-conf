@@ -36,7 +36,7 @@ jobs:
       - name: Build & scan
         id: scan
         run: |
-          mvn -Pbedework-dev dependency:resolve-plugins dependency:resolve
+          mvn -Pbedework-dev --settings ./.github/workflows/settings.xml  dependency:resolve-plugins dependency:resolve
           mvn -Pbedework-dev --settings ./.github/workflows/settings.xml \
             --no-transfer-progress clean package -DskipTests \
             -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
