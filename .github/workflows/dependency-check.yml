@@ -38,6 +38,7 @@ jobs:
         run: |
           mvn --no-transfer-progress clean package -DskipTests -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
             org.owasp:dependency-check-maven:aggregate -l ${{github.workspace}}/mvn-output.txt
+          cp -r ./target/reports ${{github.workspace}}/
         #env:
         #  MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME}}
         #  MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD}}
@@ -53,7 +54,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: "./target/reports"
+          path: "${{github.workspace}}/reports"
 
   # Deployment job
   deploy:
