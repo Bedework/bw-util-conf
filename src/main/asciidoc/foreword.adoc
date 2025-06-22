@@ -1,0 +1,2 @@
+These packages support the configuration mechanisms used by bedework.
+

@@ -1,0 +1,4 @@
+== Util-config
+Provides classes and interfaces to save and lload XML formatted configuration options from files.
+
+It was intended to expand this package to load and save data via WebDAV. This may yet happen.

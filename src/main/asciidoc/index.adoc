@@ -1,0 +1,28 @@
+= Bedework Configuration modules.
+:title: Bedework Configuration modules.
+:safe-mode-unsafe:
+:docinfo: shared
+:docinfodir: ./docinfo
+:docinfo2:
+:scriptsdir: ./tocbot-3.0.2
+:imagesdir: ./resources/
+:toc: left
+:toclevels: 4
+:sectnumlevels: 4
+//
+:util-config-dir: util-config/
+:util-jmx-dir: util-jmx/
+:util-options-dir: util-options/
+//
+:sectnums!:
+
+include::foreword.adoc[]
+include::introduction.adoc[]
+
+:sectnums:
+
+[[config]]
+include::{util-config-dir}overview.adoc[]
+
+[[jmx]]
+include::{util-jmx-dir}overview.adoc[]

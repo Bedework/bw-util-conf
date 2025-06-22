@@ -1,0 +1,6 @@
+== Introduction
+
+This project contains a number of modules used for configuration in bedework.
+
+The util-options package is not used now but remains here for the time being.
+

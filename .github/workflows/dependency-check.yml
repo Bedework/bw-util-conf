@@ -5,7 +5,7 @@ on: [push]
 jobs:
   depchecktest:
     runs-on: ubuntu-latest
-    name: depecheck_test
+    name: depcheck_test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
