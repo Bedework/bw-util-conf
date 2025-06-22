@@ -53,7 +53,7 @@ jobs:
         id: deployment
         uses: actions/upload-pages-artifact@v3
         with:
-          path: target/reports
+          path: "./target/reports"
 
   # Deployment job
   deploy:
