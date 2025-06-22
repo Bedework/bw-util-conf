@@ -17,27 +17,40 @@ jobs:
           java-version: 21
           cache: maven
 
-      - name: Build project with Maven
-        run: mvn -Pbedework-dev --settings ./.github/workflows/settings.xml clean install
+      - name: Get Date
+        id: get-date
+        run: |
+          echo "datetime=$(/bin/date -u "+%Y%m%d%H")" >> $GITHUB_OUTPUT
+        shell: bash
 
-      - name: Depcheck
-        uses: dependency-check/Dependency-Check_Action@main
-        env:
-          # actions/setup-java@v1 changes JAVA_HOME so it
-          # needs to be reset to match the depcheck image
-          JAVA_HOME: /opt/jdk
-        id: Depcheck
+      - name: Restore cached Maven dependencies
+        uses: actions/cache/restore@v3
         with:
-          project: 'bw-util-conf'
-          path: '.'
-          format: 'HTML'
-          out: 'reports' # this is the default, no need to specify unless you wish to override it
-          args: >
-            --failOnCVSS 7
-            --enableRetired
+          path: ~/.m2/repository
+          # Using datetime in cache key as OWASP database may change, without the pom changing
+          key: ${{ runner.os }}-maven-${{ steps.get-date.outputs.datetime }}-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ steps.get-date.outputs.datetime }}
+            ${{ runner.os }}-maven-
+
+      - name: Build & scan
+        id: scan
+        run: |
+          mvn --no-transfer-progress clean package -DskipTests -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
+            org.owasp:dependency-check-maven:aggregate -l ${{github.workspace}}/mvn-output.txt
+        env:
+          MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME}}
+          MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD}}
+
+      - name: Cache Maven dependencies
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ steps.get-date.outputs.datetime }}-${{ hashFiles('**/pom.xml') }}
 
       - name: Upload Test results
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
-          name: Depcheck report
-          path: ${{github.workspace}}/reports
+          name: Dependency check report
+          path: target/dependency-check-report.html
