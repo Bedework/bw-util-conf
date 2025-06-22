@@ -38,7 +38,7 @@ jobs:
         run: |
           mvn --no-transfer-progress clean package -DskipTests -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
             org.owasp:dependency-check-maven:aggregate -l ${{github.workspace}}/mvn-output.txt
-          ls -al .
+          ls -al target/
           cp -r ./target/reports ${{github.workspace}}/
         #env:
         #  MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME}}
