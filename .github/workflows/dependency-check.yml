@@ -3,9 +3,9 @@ name: dependency-check
 on: [push]
 
 jobs:
-  depchecktest:
+  depcheck:
     runs-on: ubuntu-latest
-    name: depcheck_test
+    name: depcheck
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,7 +50,19 @@ jobs:
           key: ${{ runner.os }}-maven-${{ steps.get-date.outputs.datetime }}-${{ hashFiles('**/pom.xml') }}
 
       - name: Upload Test results
-        uses: actions/upload-artifact@v4
+        id: deployment
+        uses: actions/upload-pages-artifact@v3
         with:
-          name: Dependency check report
-          path: target/dependency-check-report.html
+          path: target/reports
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: depcheck
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
