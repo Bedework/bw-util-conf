@@ -36,8 +36,11 @@ jobs:
       - name: Build & scan
         id: scan
         run: |
-          mvn --no-transfer-progress clean package -DskipTests -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
-            org.owasp:dependency-check-maven:aggregate -l ${{github.workspace}}/mvn-output.txt
+          mvn -Pbedework-dev --settings ./.github/workflows/settings.xml \
+            --no-transfer-progress clean package -DskipTests \
+            -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
+            org.owasp:dependency-check-maven:aggregate \
+            -l ${{github.workspace}}/mvn-output.txt
           ls -al target/
           cp -r ./target/reports ${{github.workspace}}/
         #env:
