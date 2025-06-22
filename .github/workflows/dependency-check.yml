@@ -1,4 +1,4 @@
-name: dependency-check.yml
+name: dependency-check
 
 on: [push]
 
