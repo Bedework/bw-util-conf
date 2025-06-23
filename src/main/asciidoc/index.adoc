@@ -29,4 +29,5 @@ include::{util-config-dir}overview.adoc[]
 include::{util-jmx-dir}overview.adoc[]
 
 [[reports]]
-include::{reports-dir}dependency-check-report.html[]
+== Reports
+https://reports/dependency-check-report.html[Dependency check]
