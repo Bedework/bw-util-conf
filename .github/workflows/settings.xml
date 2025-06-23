@@ -14,11 +14,9 @@
         <repository>
           <releases>
             <enabled>true</enabled>
-            <updatePolicy>never</updatePolicy>
           </releases>
           <snapshots>
             <enabled>false</enabled>
-            <updatePolicy>never</updatePolicy>
           </snapshots>
           <id>central-releases</id>
           <name>Central Repository</name>
@@ -29,11 +27,10 @@
         <repository>
           <releases>
             <enabled>false</enabled>
-            <updatePolicy>never</updatePolicy>
           </releases>
           <snapshots>
             <enabled>true</enabled>
-            <updatePolicy>never</updatePolicy>
+            <updatePolicy>always</updatePolicy>
           </snapshots>
           <id>central</id>
           <name>Central Repository</name>

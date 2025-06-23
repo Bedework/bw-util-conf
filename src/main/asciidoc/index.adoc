@@ -10,6 +10,7 @@
 :toclevels: 4
 :sectnumlevels: 4
 //
+:reports-dir: reports/
 :util-config-dir: util-config/
 :util-jmx-dir: util-jmx/
 :util-options-dir: util-options/
@@ -26,3 +27,6 @@ include::{util-config-dir}overview.adoc[]
 
 [[jmx]]
 include::{util-jmx-dir}overview.adoc[]
+
+[[reports]]
+include::{reports-dir}dependency-check-report.html[]
