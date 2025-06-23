@@ -30,4 +30,4 @@ include::{util-jmx-dir}overview.adoc[]
 
 [[reports]]
 == Reports
-https://reports/dependency-check-report.html[Dependency check]
+link:reports/dependency-check-report.html[Dependency check]
