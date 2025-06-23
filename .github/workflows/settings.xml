@@ -13,19 +13,6 @@
       <repositories>
         <repository>
           <releases>
-            <enabled>true</enabled>
-          </releases>
-          <snapshots>
-            <enabled>false</enabled>
-          </snapshots>
-          <id>central-releases</id>
-          <name>Central Repository</name>
-          <url>https://central.sonatype.com/repository/</url>
-          <layout>default</layout>
-        </repository>
-
-        <repository>
-          <releases>
             <enabled>false</enabled>
           </releases>
           <snapshots>
