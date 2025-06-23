@@ -6,6 +6,10 @@ jobs:
   depcheck:
     runs-on: ubuntu-latest
     name: depcheck
+    permissions:
+      # Give the default GITHUB_TOKEN write permission to commit and push the
+      # added or changed files to the repository.
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,37 +45,16 @@ jobs:
             -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
             org.owasp:dependency-check-maven:aggregate 
           #  -l ${{github.workspace}}/mvn-output.txt
-          ls -al target/
-          cp -r ./target/reports ${{github.workspace}}/
-        #env:
-        #  MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME}}
-        #  MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD}}
+          #env:
+          #  MAVEN_USERNAME: ${{ secrets.MAVEN_USERNAME}}
+          #  MAVEN_PASSWORD: ${{ secrets.MAVEN_PASSWORD}}
 
-      - name: Cache Maven dependencies
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ steps.get-date.outputs.datetime }}-${{ hashFiles('**/pom.xml') }}
-
-      - name: Upload Test results
-        id: deployment
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "${{github.workspace}}/reports"
-
-  # Deployment job
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
-    needs: depcheck
-    steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Copy to docs and push changes
+        id: deploy
+        run: |
+          cp -r ./target/reports docs/
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add .
+          git commit -m "deploy generated dependency check report"
+          git push
