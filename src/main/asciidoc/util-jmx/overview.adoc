@@ -1,2 +1,2 @@
 == Util-jmx
-Provides jmx access to the configuration data supported bu util-config.
+Provides jmx access to the configuration data supported by util-config.
