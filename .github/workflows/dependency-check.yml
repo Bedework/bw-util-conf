@@ -41,7 +41,7 @@ jobs:
         id: scan
         run: |
           mvn -Pbedework-dev --settings ./.github/workflows/settings.xml \
-            --no-transfer-progress clean package -DskipTests \
+            --no-transfer-progress clean install -DskipTests \
             -DnvdApiKey=${{secrets.nvdApiKey}} -DskipITs -Dmax.cvss.score=8 \
             org.owasp:dependency-check-maven:aggregate 
           #  -l ${{github.workspace}}/mvn-output.txt
