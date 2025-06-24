@@ -9,7 +9,7 @@ This project provides a number of configuration related classes and methods for
 2. Maven 3
 
 ## Using this project
-See documentation at [github pages for bw-util-conf](https://bedework.github.io/bw-util-conf/)
+See documentation at [github pages for this project](https://bedework.github.io/bw-util-conf/)
 
 ## Reporting Issues
 Please report issues via the github issues tab at

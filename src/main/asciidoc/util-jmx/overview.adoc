@@ -1,2 +1,4 @@
+[[jmx]]
 == Util-jmx
 Provides jmx access to the configuration data supported by util-config.
+

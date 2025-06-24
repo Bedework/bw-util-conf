@@ -22,11 +22,9 @@ include::introduction.adoc[]
 
 :sectnums:
 
-[[config]]
 include::{util-config-dir}overview.adoc[]
 include::{util-config-dir}using.adoc[]
 
-[[jmx]]
 include::{util-jmx-dir}overview.adoc[]
 include::{util-jmx-dir}using.adoc[]
 
