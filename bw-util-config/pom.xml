@@ -25,7 +25,7 @@
 
     <dependency>
       <groupId>org.bedework</groupId>
-      <artifactId>bw-util-misc</artifactId>
+      <artifactId>bw-util-properties</artifactId>
     </dependency>
 
     <dependency>

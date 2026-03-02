@@ -19,12 +19,13 @@
 
 package org.bedework.util.config;
 
+import org.bedework.base.exc.BedeworkException;
 
 /** Base exception thrown by config classes
  *
  *   @author Mike Douglass
  */
-public class ConfigException extends Throwable {
+public class ConfigException extends BedeworkException {
   /** Constructor
    *
    * @param s a message
